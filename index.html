@@ -302,33 +302,36 @@
               Robustness is induced by the training schedule. During training each modality is independently dropped or corrupted with probability 0.5, following a curriculum that transitions from clean inputs to full dropout: corruption starts mild and grows in severity over epochs, drawn from Gaussian noise, horizontal motion blur and/or centered occlusion. The model thus first learns multimodal fusion under near-clean conditions, then progressively learns to rely on redundant cues as modalities degrade or disappear. This is what prevents the harmful-dependency failure mode: by repeatedly removing each sensor, none becomes indispensable.
             </p>
 
-            <div class="content has-text-centered">
-              <video id="noise-gif"
-                    controls
-                    muted
-                    preload
-                    playsinline
-                    width="75%">
-                <source src="./static/gifs/blur_progression.gif"
-                        type="image/gif">
-              </video>
-            </div>
-
             <h4 class="title is-5">Corruption types</h4>
               <section class="section">
                   <div class="container is-max-desktop">
-                    <div id="corruption-carousel" class="carousel results-carousel">
-                      <a href="./static/gifs/blur_progression.gif" data-lightbox="image">
-                        <img src="./static/gifs/blur_progression.gif" alt="Blur">
-                      </a>
+                    <div class="columns is-multiline is-centered">
+                      <div class="column is-one-third">
+                        <div class="has-text-centered">
+                          <a href="./static/gifs/blur_progression.gif" data-lightbox="corruption">
+                            <img src="./static/gifs/blur_progression.gif" alt="Blur">
+                          </a>
+                          <p class="mt-3"><strong>Motion Blur</strong></p>
+                        </div>
+                      </div>
 
-                      <a href="./static/gifs/gaussian_progression.gif" data-lightbox="image">
-                        <img src="./static/gifs/gaussian_progression.gif" alt="Gaussian Noise">
-                      </a>
+                      <div class="column is-one-third">
+                        <div class="has-text-centered">
+                          <a href="./static/gifs/gaussian_progression.gif" data-lightbox="corruption">
+                            <img src="./static/gifs/gaussian_progression.gif" alt="Gaussian Noise">
+                          </a>
+                          <p class="mt-3"><strong>Gaussian Noise</strong></p>
+                        </div>
+                      </div>
 
-                      <a href="./static/gifs/occlusion_progression.gif" data-lightbox="image">
-                        <img src="./static/gifs/occlusion_progression.gif" alt="Occlusion">
-                      </a>
+                      <div class="column is-one-third">
+                        <div class="has-text-centered">
+                          <a href="./static/gifs/occlusion_progression.gif" data-lightbox="corruption">
+                            <img src="./static/gifs/occlusion_progression.gif" alt="Occlusion">
+                          </a>
+                          <p class="mt-3"><strong>Occlusion</strong></p>
+                        </div>
+                      </div>
                     </div>
                   </div>
               </section>
