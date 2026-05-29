@@ -141,7 +141,7 @@
                 type="video/mp4">
       </video>
       <h2 class="subtitle has-text-centered">
-        <span class="dnerf">Project Name</span> one-sentence teaser about what your project does.
+        <span class="dnerf">Sensory-robust multimodal VLA</span> an study on how to make robust and multimodal VLAs.
       </h2>
     </div>
   </div>
@@ -159,15 +159,13 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            <!-- TODO: Replace this abstract with your own project summary (3-5 sentences). -->
-            [Problem] Briefly describe the problem your project tackles and why it matters.
+            State-of-the-art Vision-Language-Action (VLA) models rely mostly on RGB perception and suffer catastrophic performance degradation under sensor failure
           </p>
           <p>
-            [Approach] Explain your main idea, model, or system in one to two sentences.
+            We propose, study, and discard a general pipeline and training strategy that is focused on mitigating this dependence and allowing for massive multi-modality out-of-the-box. The main building block of our pipeline is the 4M-21 model, capable of combining the inputs into a latent representation. This abstraction is then passed through a MLP to a fine-tuned SmolVLA that handles action generation, potentially leading to a multi-modal robust VLA capable of handling sensor corruption and even full modality dropout.
           </p>
           <p>
-            [Results] Summarize key outcomes, such as quantitative improvements, qualitative
-            observations, and main conclusions.
+            We show that this approach is not sufficient for the task and analyze the factors that make it fail. After showing the characteristics this approach is lacking, we propose multiple solutions to improve the pipeline and achieve multi-modal robustness.
           </p>
         </div>
       </div>
@@ -206,9 +204,9 @@
             </div>
 
             <div class="tile is-parent">
-              <a href="#results" class="tile is-child box">
+              <a href="#experiments" class="tile is-child box">
                 <p class="subtitle">
-                  <font size="-1">Results</font>
+                  <font size="-1">Experiments</font>
                 </p>
               </a>
             </div>
@@ -216,7 +214,15 @@
             <div class="tile is-parent">
               <a href="#conclusion" class="tile is-child box">
                 <p class="subtitle">
-                  <font size="-1">Conclusion and Limitations</font>
+                  <font size="-1">Conclusion</font>
+                </p>
+              </a>
+            </div>
+
+            <div class="tile is-parent">
+              <a href="#limitations" class="tile is-child box">
+                <p class="subtitle">
+                  <font size="-1">Limitations and future work</font>
                 </p>
               </a>
             </div>
@@ -246,7 +252,7 @@
           <h2 class="title is-3" id="intro">I. Introduction</h2>
           <div class="content has-text-justified">
             <p>
-              The introduction part of the report can be provided here
+              Current VLA models are not designed with sensor robustness in mind: they assume all inputs are clean and present at inference time. Yet recent work shows that even small perturbations such as Gaussian noise, motion blur, or spatter can cause success rates to drop from 90% to below 10%. In real deployments, sensors fail, get occluded or degrade and a robot policy that fails under these conditions is not deployable. That is why we aim to build a VLA that is more robust to sensor errors.
             </p>
           </div>
         </div>
@@ -295,13 +301,13 @@
 
 <!------------------------------------------------------------------------->
 
-<!-----------------------------TODO: RESULTS-------------------------------->
+<!-----------------------------TODO: EXPERIMENTS-------------------------------->
   <section class="section">
     <div class="container is-max-desktop">
-      <!-- Results. -->
+      <!-- Experiments. -->
       <div class="columns is-centered">
         <div class="column is-full-width">
-          <h2 class="title is-3" id="results">IV. Results</h2>
+          <h2 class="title is-3" id="results">IV. Experiments</h2>
           <div class="content has-text-justified">
             <p>
               The results part of the report can be provided here
@@ -309,7 +315,7 @@
           </div>
         </div>
       </div>
-      <!--/ Results. -->
+      <!--/ Experiments. -->
     </div>
   </section>
 <!------------------------------------------------------------------------->
