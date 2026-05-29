@@ -356,43 +356,55 @@
           <h2 class="title is-3" id="results">IV. Experiments</h2>
           <div class="content has-text-justified">
 
-            <h3 class="title is-4">4.1 Experimental Setup</h3>
+            <h3 class="title is-4">4.1 Implementation details</h3>
             <p>
-              We evaluate our approach on the four LIBERO benchmark suites: Spatial, Object, Goal, and Long. The vanilla LIBERO evaluation pipeline only provides RGB as input. This can be circumvented, as from the base physics simulator used under the hood (MuJoCo) depth and object segmentation can be extracted directly. This way "real-time" multi-modal inputs can be passed to our model to ensure the evaluation accounts for these capabilities. We also included a corruption module that can perturb the images passed during evaluation to measure the robustness of our model. Performance is measured using task success rate averaged across all tasks.
-            </p>
-            <p>
-              <strong>Baseline model.</strong> Our starting point is SmolVLA, a lightweight pretrained vision-language-action model relying on a SigLIP visual encoder. The objective of this work is to replace the original SigLIP encoder with the multimodal 4M-21 encoder while preserving the pretrained robotic policy.
-            </p>
-            <p>
-              <strong>Implementation details.</strong> All experiments are conducted on the EPFL IZAR cluster using NVIDIA A100 GPUs. The pretrained 4M-21 encoder and SmolVLA backbone remain frozen throughout training. Only a lightweight MLP projector is optimized to map 4M visual tokens into the latent space expected by SmolVLA.
+              All experiments are conducted on the EPFL IZAR cluster using NVIDIA V100 GPUs. The pretrained 4M-21 encoder and SmolVLA backbone remain frozen throughout training. Only a lightweight MLP projector is optimized to map 4M visual tokens into the latent space expected by SmolVLA            
             </p>
 
-            <h3 class="title is-4">4.2 Initial Encoder Replacement Failure</h3>
+            <h3 class="title is-4">4.2 Analysis of Encoder Replacement</h3>
             <p>
-              Our first approach consisted of directly replacing the SigLIP visual encoder with 4M-21 and training only a shallow MLP connector using the downstream action loss. The underlying assumption was that the policy supervision alone would implicitly align the projected 4M representations with the latent space expected by SmolVLA.
+              Our first approach consisted of directly replacing the original SigLIP visual encoder of SmolVLA with the 4M-21 encoder while training only a MLP connector using the downstream action loss. All experiments in this section were conducted using clean RGB observations in order to isolate the effect of the encoder replacement itself and to validate the pipeline.
             </p>
-            <p>However, this approach completely failed during evaluation, reaching a 0% success rate on LIBERO tasks. Examples of tasks the robots need to complete include:</p>
+            <p>The underlying assumption was that policy supervision alone would implicitly align the projected 4M representations with the latent space expected by the pretrained SmolVLA backbone.</p>
+            <p>However, this approach completely failed during evaluation, reaching a 0% success rate on LIBERO tasks. The evaluated tasks included manipulation sequences such as:</p>
             <ul>
-              <li>Put both the alphabet soup and the tomato sauce in the basket.</li>
-              <li>Turn on the stove and put the moka pot on it.</li>
-              <li>Put the white mug on the left plate and put the yellow and white mug on the right plate.</li>
+              <li>Putting both the alphabet soup and the tomato sauce into the basket</li>
+              <li>Turning on the stove and placing the moka pot on it</li>
+              <li>Placing different mugs onto designated plates</li>
             </ul>
             <p>
-              We identified the global representation alignment as one key issue. The two latent spaces were strongly separated, indicating severe representation mismatch. Quantitatively:
+              To better understand the source of failure, we progressively analyzed the system in a top-down fashion. We first verified that the original SmolVLA pipeline reproduced the expected LIBERO performance, reaching approximately 80% success rate. We then focused specifically on the modified component: the encoder replacement pipeline composed of the 4M-21 encoder and the MLP projector.
+            </p>
+
+            <h4 class="title is-5">Global Representation Misalignment</h4>
+            <p>
+              We first investigated the global organization of the latent spaces using t-SNE visualization. The figure below shows the latent representations produced by SigLIP and by the projected 4M + MLP features before introducing any distillation objective.
+            </p>
+            <div class="columns is-centered">
+              <div class="column is-three-quarters">
+                <div class="box has-text-centered">
+                  <img src="static/images/tsne.png"alt="TSNE.">
+                  <p class="mt-2"><em>Figure 2: t-SNE visualization of SigLIP and projected 4M latent representations before distillation. The two manifolds remain strongly separated, indicating severe global representation mismatch.</em></p>
+                </div>
+              </div>
+            </div>
+            <p>
+              Initially, the two latent spaces were strongly separated, indicating severe incompatibility between the projected 4M embeddings and the representations expected by SmolVLA. To quantify this mismatch, we computed both the mean cosine similarity and the mean token norm between SigLIP and projected 4M features.
             </p>
             <div class="table-container">
               <table class="table is-bordered is-striped is-narrow is-hoverable">
+                <caption><em>Table 1: Global latent statistics before distillation.</em></caption>
                 <thead>
                   <tr>
                     <th></th>
                     <th>SigLIP</th>
-                    <th>4M + MLP (action loss only)</th>
+                    <th>4M + MLP</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Mean cosine similarity to SigLIP</td>
-                    <td>1.0</td>
+                    <td>Mean cosine similarity</td>
+                    <td>—</td>
                     <td>0.014</td>
                   </tr>
                   <tr>
@@ -404,110 +416,114 @@
               </table>
             </div>
             <p>
-              We then tackled this by aligning both SigLIP and 4M + MLP features via a global cosine alignment loss. After distillation, the projected 4M embeddings became significantly closer to the SigLIP manifold:
+              These results confirmed that the projected 4M embeddings were both geometrically misaligned and strongly mismatched in magnitude compared to SigLIP representations. To address this issue, we introduced a global cosine alignment loss between the projected 4M + MLP embeddings and the original SigLIP features. The objective operated on mean-pooled visual embeddings, encouraging the global latent representations to become closer in direction.
+            </p>
+            <div class="columns is-centered">
+              <div class="column is-three-quarters">
+                <div class="box has-text-centered">
+                  <img src="static/images/tsne_distill.png"alt="TSNE-distill.">
+                  <p class="mt-2"><em>Figure 3: t-SNE visualization after global distillation. The projected 4M representations become significantly closer to the SigLIP manifold.</em></p>
+                </div>
+              </div>
+            </div>
+            <p>
+              After distillation, the projected 4M + MLP embeddings became significantly closer to the SigLIP manifold and the cosine similarity improved substantially.
             </p>
             <div class="table-container">
               <table class="table is-bordered is-striped is-narrow is-hoverable">
+                <caption><em>Table 2: Global latent statistics after mean-pooled distillation.</em></caption>
                 <thead>
                   <tr>
-                    <th></th>
-                    <th>SigLIP</th>
-                    <th>4M + MLP (+ global distillation)</th>
+                    <th>Metric</th>
+                    <th>Value</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Mean cosine similarity to SigLIP</td>
-                    <td>1.0</td>
+                    <td>Mean cosine similarity (SigLIP vs 4M+MLP)</td>
                     <td>0.271</td>
                   </tr>
                   <tr>
-                    <td>Mean L2 norm</td>
+                    <td>Mean L2 norm (SigLIP)</td>
                     <td>36.05</td>
+                  </tr>
+                  <tr>
+                    <td>Mean L2 norm (4M+MLP)</td>
                     <td>29.64</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <p>
-              But even with these modifications, we observed unstable robotic behaviors including repetitive motions and gripper collapse, where the policy converged to degenerate open-gripper trajectories producing a 0% success rate. The mean cosine similarity suggests the latent representations produced by the projected 4M features remained incompatible with the pretrained policy backbone.
+              Although the latent spaces appeared globally closer, the robotic policy still failed completely during evaluation and continued producing unstable behaviors, including repetitive motions and gripper collapse, where the robot converged toward degenerate open-gripper trajectories. This result suggested that global latent alignment alone was insufficient. More specifically, our initial distillation objective operated on mean-pooled embeddings, where all spatial tokens were averaged before computing the cosine loss. While this improved global latent geometry, it did not constrain the alignment of individual visual tokens.
             </p>
             <p>
-              <strong>Token-level alignment.</strong> We observed that SmolVLA relies heavily on spatial visual tokens through transformer cross-attention mechanisms. We therefore replaced the pooled distillation loss with a token-level alignment objective. Token-level distillation successfully restored spatial correspondence between visual tokens, producing strong diagonal similarity patterns. Token-level cosine similarity increased to approximately 0.86, while per-dimension Pearson correlation reached 0.69, indicating strong latent alignment between the two representation spaces.
+              However, SmolVLA relies heavily on transformer cross-attention between language tokens and spatial visual tokens. Consequently, preserving token-level correspondence appeared critical for maintaining downstream robotic behavior. To further investigate this hypothesis, we replaced the global mean-pooled distillation objective with a token-level cosine alignment loss operating directly on each visual token independently. This modification explicitly enforced local spatial alignment rather than only global latent similarity.
             </p>
-
-            <h3 class="title is-4">4.3 Representation Analysis</h3>
+            <div class="columns is-centered">
+              <div class="column is-full-width">
+                <div class="box has-text-centered">
+                  <div class="columns is-centered">
+                    <div class="column is-half">
+                      <img src="static/images/loss_distill_tokenlevel_part1.png"alt="3D Bezier curves are used for representing 3D sketches of objects.">
+                      <p class="mt-1"><em>(a) Training dynamics (Part 1)</em></p>
+                    </div>
+                    <div class="column is-half">
+                      <img src="static/images/loss_distill_tokenlevel_part2.png"alt="3D Bezier curves are used for representing 3D sketches of objects.">                      
+                      <p class="mt-1"><em>(b) Training dynamics (Part 2)</em></p>
+                    </div>
+                  </div>
+                  <p class="mt-2"><em>Figure 4: Token-level cosine distillation training.</em></p>
+                </div>
+              </div>
+            </div>
             <p>
-              Although representation geometry and spatial correspondence improved significantly, the policy still failed during downstream robotic evaluation. Analysis of the distribution of token norms produced by the projected 4M features compared to the original SigLIP embeddings revealed that projected 4M tokens remained severely under-scaled in magnitude, with average norms nearly one order of magnitude smaller than SigLIP representations.
+              Token-level distillation significantly improved representation alignment, reaching a mean cosine similarity of approximately 0.77. However, we simultaneously observed large instability in token magnitudes, motivating the introduction of LayerNorm inside the MLP projector to stabilize the projected representations.
             </p>
             <p>
-              This is particularly important because transformer attention mechanisms are highly sensitive to embedding magnitudes. Even when embeddings share similar directions and spatial organization, scale mismatches can strongly reduce the contribution of visual tokens inside the pretrained backbone.
+              To verify whether token-level distillation successfully preserved spatial correspondence, we computed pairwise cosine similarity between all SigLIP and projected 4M visual tokens. After token-level distillation, the similarity matrix exhibited a strong diagonal structure, indicating that corresponding spatial regions became properly aligned between both latent spaces. This result confirmed that token-level supervision successfully restored local spatial consistency, unlike the previous mean-pooled objective which only aligned global representations.
             </p>
-            <p>Our experiments therefore suggest that encoder replacement in pretrained VLAs requires simultaneously matching:</p>
-            <ul>
-              <li>Latent geometry</li>
-              <li>Spatial token structure</li>
-              <li>Internal activation scales</li>
-            </ul>
-
-            <h3 class="title is-4">4.4 Quantitative Results</h3>
-            <p>LIBERO task success rate (%) after replacing the SigLIP encoder with 4M-21:</p>
+            <div class="columns is-centered">
+              <div class="column is-three-quarters">
+                <div class="box has-text-centered">
+                  <img src="static/images/token_level_alignment_heat.png" alt="Cosine similarity.">
+                  <p class="mt-2"><em>Figure 5: Spatial cosine similarity heatmap between SigLIP and projected 4M visual tokens after token-level distillation. Strong diagonal patterns indicate restored spatial token correspondence.</em></p>
+                </div>
+              </div>
+            </div>
+            <p>
+              Despite the strong geometric and spatial alignment obtained after token-level distillation, the robotic policy still failed during downstream evaluation.
+            </p>
             <div class="table-container">
-              <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <table class="table is-bordered is-striped is-narrow is-hoverable">
+                <caption><em>Table 3: Token-level latent statistics.</em></caption>
                 <thead>
                   <tr>
-                    <th>Method</th>
-                    <th>Spatial</th>
-                    <th>Object</th>
-                    <th>Goal</th>
-                    <th>Long</th>
-                    <th>Avg.</th>
+                    <th></th>
+                    <th>SigLIP</th>
+                    <th>4M + MLP</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>SmolVLA (baseline)</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>87.3</td>
-                  </tr>
-                  <tr>
-                    <td>Ours (action loss only)</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
-                    <td>0.0</td>
-                  </tr>
-                  <tr>
-                    <td>Ours (+ global distillation)</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
-                  </tr>
-                  <tr>
-                    <td>Ours (+ token distillation)</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
-                    <td>[TODO]</td>
+                    <td>Mean L2 norm</td>
+                    <td>36.05</td>
+                    <td>16.0</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-
-            <h3 class="title is-4">4.5 Discussion</h3>
             <p>
-              Our experiments progressively revealed that replacing the visual encoder inside a pretrained VLA is substantially more difficult than expected. Even after recovering strong cosine similarity, spatial token correspondence, and compatible latent geometry, the robotic policy still failed during downstream evaluation.
+              Table 3 reveals a major scale mismatch between SigLIP and the projected 4M representations. While SigLIP produces a mean L2 norm of 36.05, the 4M+MLP tokens have a mean norm of 16.0 due to the LayerNorm applied inside the MLP connector. This difference is critical because the projected visual tokens are directly injected into the pretrained transformer backbone of SmolVLA. Inside SmolVLA, visual and language tokens interact through transformer attention layers based on dot-product operations between embeddings. Although the cosine distillation loss successfully aligned token directions, it did not constrain their magnitudes. As a result, the projected 4M embeddings remained significantly smaller than the original SigLIP representations used during SmolVLA pretraining. This scale mismatch likely weakened the contribution of visual tokens inside the transformer backbone, leading to degraded spatial reasoning and unstable robotic behavior.
             </p>
             <p>
-              This suggests that pretrained VLAs rely on deeper structural properties of the original visual latent space — including internal attention dynamics and activation scaling — which are not preserved by shallow feature projection alone. Successful encoder replacement likely requires stronger adaptation mechanisms than simple latent alignment through a lightweight MLP projector.
+              Overall, our experiments revealed that encoder replacement inside pretrained VLAs is substantially more difficult than simple latent alignment. Even after recovering strong cosine similarity, spatial token correspondence, and compatible latent geometry, the robotic policy still failed during downstream evaluation. Our results suggest that successful encoder replacement requires preserving multiple properties simultaneously:
             </p>
+            <ul>
+              <li>Latent geometry</li>
+              <li>Spatial token structure</li>
+              <li>The activation scales expected by the pretrained transformer</li>
+            </ul>
           </div>
         </div>
       </div>
