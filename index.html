@@ -233,12 +233,6 @@
               <li><strong>Research gap.</strong> Current state-of-the-art robustness techniques, such as RobustVLA, focus on visual noise and RGB perturbations. No existing work studies what happens when a sensor is entirely absent at inference time across richer multimodal settings.</li>
             </ul>
             <p><strong>Our approach.</strong> We test a sensor-robust multi-modal VLA that (i) leverages four complementary modalities (RGB, depth, segmentation, thermal) and (ii) is trained with corruption, using a frozen 4M-21 encoder and a modality-dropout curriculum.</p>
-            <p><strong>Contributions.</strong> In summary, this work contributes:</p>
-            <ul>
-              <li>A multi-modal perception pipeline combining 4M-21, ImageBind, and SmolVLA with support for four input modalities (RGB, depth, segmentation, thermal).</li>
-              <li>A modality-dropout curriculum training strategy that builds graceful degradation under sensor corruption or complete sensor dropout.</li>
-              <li>A systematic evaluation protocol on LIBERO covering clean inputs, hard dropout, and soft corruptions, with ablations over modalities and training schedules.</li>
-            </ul>
           </div>
         </div>
       </div>
