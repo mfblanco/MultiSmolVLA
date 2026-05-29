@@ -224,13 +224,13 @@
           <h2 class="title is-3" id="intro">I. Introduction</h2>
           <div class="content has-text-justified">
             <p>
-              Current VLA models are not designed with sensor robustness in mind: they assume all inputs are clean and present at inference time. Yet recent work shows that even small perturbations such as Gaussian noise, motion blur, or spatter can cause success rates to drop from 90% to below 10%. In real deployments, sensors fail, get occluded or degrade and a robot policy that fails under these conditions is not deployable. That is why we aim to build a VLA that is more robust to sensor errors.
+              Current VLA models are not designed with sensor robustness in mind: they assume all inputs are clean and present at inference time. Yet recent work shows that even small perturbations such as Gaussian noise, motion blur, or spatter can cause success rates to drop from 90% to below 10% [4]. In real deployments, sensors fail, get occluded or degrade and a robot policy that fails under these conditions is not deployable. That is why we aim to build a VLA that is more robust to sensor errors.
             </p>
             <p><strong>Why does this matter?</strong></p>
             <ul>
               <li><strong>Deployment safety.</strong> Real robots face hardware failures. The camera used by a robotic arm can get cracked or scratched, and the sensors in a mobile robot can get dirty or occluded during task execution. A policy that degrades gracefully rather than catastrophically is a prerequisite for reliable deployment.</li>
               <li><strong>Sensor diversity.</strong> Integrating depth or semantic features risks a harmful dependency where sensor failure yields worse performance than an RGB-only baseline. This work strives to safely unlock multi-sensor capabilities.</li>
-              <li><strong>Research gap.</strong> Current state-of-the-art robustness techniques, such as RobustVLA, focus on visual noise and RGB perturbations. No existing work studies what happens when a sensor is entirely absent at inference time across richer multimodal settings.</li>
+              <li><strong>Research gap.</strong> Current state-of-the-art robustness techniques, such as RobustVLA [4], focus on visual noise and RGB perturbations. No existing work studies what happens when a sensor is entirely absent at inference time across richer multimodal settings.</li>
             </ul>
             <p><strong>Our approach.</strong> We test a sensor-robust multi-modal VLA that (i) leverages four complementary modalities (RGB, depth, segmentation, thermal) and (ii) is trained with corruption, using a frozen 4M-21 encoder and a modality-dropout curriculum. (iii) We then propose changes and upgrades to the pipeline that could lead to better results and highlight the shortcomings of this approach.</p>
           </div>
@@ -250,10 +250,10 @@
           <h2 class="title is-3" id="related-work">II. Related Works</h2>
           <div class="content has-text-justified">
             <p>
-              Vision-Language-Action (VLA) models have become the dominant paradigm for general-purpose robot manipulation. SmolVLA, our base model, is a lightweight VLA that pairs a frozen SmolVLM2 vision-language backbone with a flow-matching action expert, matching much larger models. The larger π0 established the flow-matching design SmolVLA inherits. Both, however, assume a fixed RGB sensor suite that is clean and fully present at inference time — the assumption our work targets.
+              Vision-Language-Action (VLA) models have become the dominant paradigm for general-purpose robot manipulation. SmolVLA [1], our base model, is a lightweight VLA that pairs a frozen SmolVLM2 vision-language backbone with a flow-matching action expert, matching much larger models. The larger π0 [2] established the flow-matching design SmolVLA inherits. Both, however, assume a fixed RGB sensor suite that is clean and fully present at inference time — the assumption our work targets.
             </p>
-            <p><strong>Robustness of VLAs.</strong> Recent analyses show this assumption is fragile. LIBEROPlus and Guo et al. report that mild corruptions (noise, blur, partial occlusion) can collapse success rates from ~90% to below 10%. RobustVLA tackles this through robustness-aware post-training but focuses on RGB noise and does not consider full sensor disappearance. CRT reconstructs corrupted RGB inputs before the policy. All these methods improve resilience within the RGB modality; none addresses the case where an entire modality is absent at test time, which is our setting.</p>
-            <p><strong>Multimodal VLAs.</strong> OmniVLA adds infrared, mmWave and acoustic sensing via masked-image overlays. ForceVLA adds force sensing to π0 through a mixture-of-experts module, motivating our plug-in adapter design. Both require the new sensors to be present at test time and do not analyze partial sensor failure. Our perception backbone is 4M-21, which fuses arbitrary subsets of available modalities, with ImageBind bridging in synthetic thermal from ThermalGen. We adopt the MLP connector design of LLaVA-1.5, and a curriculum dropout schedule inspired by masked-training strategies for sensor-robust control. Evaluation uses LIBERO with our corruption protocol.</p>
+            <p><strong>Robustness of VLAs.</strong> Recent analyses show this assumption is fragile. LIBEROPlus [3] and Guo et al. [4] report that mild corruptions (noise, blur, partial occlusion) can collapse success rates from ~90% to below 10%. RobustVLA tackles this through robustness-aware post-training but focuses on RGB noise and does not consider full sensor disappearance. CRT [5] reconstructs corrupted RGB inputs before the policy. All these methods improve resilience within the RGB modality; none addresses the case where an entire modality is absent at test time, which is our setting.</p>
+            <p><strong>Multimodal VLAs.</strong> OmniVLA [6] adds infrared, mmWave and acoustic sensing via masked-image overlays. ForceVLA [7] adds force sensing to π0 through a mixture-of-experts module, motivating our plug-in adapter design. Both require the new sensors to be present at test time and do not analyze partial sensor failure. Our perception backbone is 4M-21 [8], which fuses arbitrary subsets of available modalities, with ImageBind [9] bridging in synthetic thermal from ThermalGen [14]. We adopt the MLP connector design of LLaVA-1.5 [10], and a curriculum dropout schedule inspired by masked-training strategies for sensor-robust control [11, 12]. Evaluation uses LIBERO [13] with our corruption protocol.</p>
           </div>
         </div>
       </div>
@@ -290,11 +290,11 @@
               Our pipeline replaces SmolVLA's SigLIP encoder with a frozen 4M-21 backbone and bridges it back into the policy with a small trainable connector.
             </p>
             <p><strong>Perception.</strong> 4M-21 is the central design choice: because it is trained to operate on arbitrary subsets of its input modalities, dropping a sensor at inference is <em>in-distribution</em> for it rather than a degenerate input. The frozen 4M-21 XL encoder fuses the available modalities into a token sequence (B, 196, D). Thermal is embedded beforehand by the frozen ImageBind encoder into a 1024-D vector that 4M-21 accepts natively.</p>
-            <p><strong>Action.</strong> A two-layer GELU MLP connector (LLaVA-1.5 style) projects the 4M-21 tokens into SmolLM2's embedding space. These are concatenated with language and robot-state tokens and passed to the SmolVLA policy, whose flow-matching action expert outputs continuous 7-DoF action chunks. Only the connector and LoRA adapters are trainable (~8M parameters), against ~2B frozen across 4M-21, ImageBind and SmolVLA, keeping training feasible on one Tesla V100 GPU.</p>
+            <p><strong>Action.</strong> A two-layer GELU MLP connector (LLaVA-1.5 style [10]) projects the 4M-21 tokens into SmolLM2's embedding space. These are concatenated with language and robot-state tokens and passed to the SmolVLA policy, whose flow-matching action expert outputs continuous 7-DoF action chunks. Only the connector and LoRA adapters are trainable (~8M parameters), against ~2B frozen across 4M-21, ImageBind and SmolVLA, keeping training feasible on one Tesla V100 GPU.</p>
 
             <h3 class="title is-4">3.2 Dataset</h3>
             <p>
-              We build on <code>binhng/libero_10_lerobot_mask_depth</code>, a LeRobot-formatted version of LIBERO-10 providing aligned RGB, depth, and segmentation. Since LIBERO has no thermal sensor, we augment it with a synthetic thermal modality generated from RGB via ThermalGen. Each Parquet shard is processed by generating thermal frames and appending them as an aligned modality; with batch inference across parallel SLURM jobs we reduce preprocessing from ~100h to ~13h. ThermalGen is synthetic and a known weak link — its outputs are not real thermal measurements, a caveat we carry into the analysis.
+              We build on <code>binhng/libero_10_lerobot_mask_depth</code>, a LeRobot-formatted version of LIBERO-10 providing aligned RGB, depth, and segmentation. Since LIBERO has no thermal sensor, we augment it with a synthetic thermal modality generated from RGB via ThermalGen [14]. Each Parquet shard is processed by generating thermal frames and appending them as an aligned modality; with batch inference across parallel SLURM jobs we reduce preprocessing from ~100h to ~13h. ThermalGen is synthetic and a known weak link — its outputs are not real thermal measurements, a caveat we carry into the analysis.
             </p>
 
             <h3 class="title is-4">3.3 Modality-Dropout Curriculum and Training</h3>
@@ -584,6 +584,68 @@
     </div>
   </section>
 <!------------------------------------------------------------------------->
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <!-- Concurrent Work. -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">References</h2>
+
+        <div class="content has-text-justified">
+          <ol class="references">
+              <li>
+                M. Shukor et al., “SmolVLA: A vision-language-action model for affordable and efficient robotics,” arXiv:2506.01844, 2025.
+              </li>
+              <li>
+                K. Black et al., “π0: A vision-language-action flow model for general robot control,” arXiv:2410.24164, 2024.
+              </li>
+              <li>
+               S. Fei et al., “LIBERO-Plus: In-depth robustness analysis of vision-language-action models,” arXiv:2510.13626, 2025
+              </li>
+              <li>
+                J. Guo et al., “On robustness of vision-language-action model against multi-modal perturbations,” arXiv:2510.00037, 2026.              
+              </li>
+              <li>
+                D. Y. Guarnizo Orjuela, L. Scappatura et al., “Improving robustness of vision-language-action models by restoring corrupted visual inputs,” arXiv:2602.01158, 2026.              
+              </li>
+              <li>
+                H. Guo et al., “OmniVLA: Physically-grounded multimodal VLA with unified multi-sensor perception for robotic manipulation,” arXiv:2511.01210, 2025          
+              </li>
+              <li>
+                Q. Yu et al., “ForceVLA: Enhancing VLA models with a force-aware MoE for contact-rich manipulation,” arXiv:2505.22159, 2025.
+              </li>
+              <li>
+                R. Bachmann, O. F. Kar, D. Mizrahi, A. Garjani, M. Gao, D. Griffiths, J. Hu, A. Dehghan, and A. Zamir, “4M-21: An any-to-any vision model for tens of tasks and modalities,” arXiv:2406.09406, 2024.
+              </li>
+              <li>
+                R. Girdhar, A. El-Nouby, Z. Liu, M. Singh, K. V. Alwala, A. Joulin, and I. Misra, “ImageBind: One embedding space to bind them all,” CVPR, 2023.
+              </li>
+              <li>
+                H. Liu, C. Li, Y. Li, and Y. J. Lee, “Improved baselines with visual instruction tuning,” arXiv:2310.03744, 2024.
+              </li>
+              <li>
+                N. Neverova, C. Wolf, G. W. Taylor, and F. Nebout, “ModDrop: Adaptive multi-modal gesture recognition,” arXiv:1501.00102, 2015.
+              </li>
+              <li>
+                S. Skand, B. Pandit, C. Kim, L. Fuxin, and S. Lee, “Simple masked training strategies yield control policies that are robust to sensor failure,” in CoRL, 2024.
+              </li>
+              <li>
+                B. Liu, Y. Zhu, C. Gao, Y. Feng, Q. Liu, Y. Zhu, and P. Stone, “LIBERO: Benchmarking knowledge transfer for lifelong robot learning,” in NeurIPS, 2023.
+              </li>
+              <li>
+                J. Xiao, R. Nayak, N. Zhang, D. Toertei, and G. Loianno, “ThermalGen: Style-disentangled flow-based generative models for RGB-to-thermal image translation,” in NeurIPS, 2025.
+              </li>
+              <!-- Add more references as needed -->
+          </ol>
+        </div>
+      </div>
+    </div>
+    <!--/ Concurrent Work. -->
+
+  </div>
+</section>
 
 <footer class="footer">
             <div class="container">
