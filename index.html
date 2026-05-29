@@ -307,6 +307,7 @@
             </p>
 
             <h4 class="title is-5">Corruption types</h4>
+              <section class="section">
                   <div class="container is-max-desktop">
                     <div id="dataset-carousel" class="carousel results-carousel">
                       <a href="./static/gifs/blur_progression.gif" data-lightbox="image">
@@ -322,6 +323,7 @@
                       </a>
                     </div>
                   </div>
+              </section>
             <p>
               Training proceeds in two stages: Stage 1 trains only the MLP connector with all pretrained modules frozen, aligning 4M-21 features with SmolLM2's token distribution; Stage 2 fine-tunes the connector and LoRA adapters under the full dropout curriculum. We validate incrementally to isolate failures: first an RGB-only run with no corruption, to verify the pipeline matches the vanilla SmolVLA baseline and the connector is not the bottleneck; then the dropout curriculum on RGB alone; and only once both pass do we add depth, segmentation, and thermal, evaluating under clean inputs, single-modality dropout, and the corruption protocol. This staged design lets us attribute any regression to a specific addition — a modality, the curriculum or the connector.
             </p>
