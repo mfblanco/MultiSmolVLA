@@ -291,6 +291,23 @@
             <p>
               Robustness is induced by the training schedule. During training each modality is independently dropped or corrupted with probability 0.5, following a curriculum that transitions from clean inputs to full dropout: corruption starts mild and grows in severity over epochs, drawn from Gaussian noise, horizontal motion blur and/or centered occlusion. The model thus first learns multimodal fusion under near-clean conditions, then progressively learns to rely on redundant cues as modalities degrade or disappear. This is what prevents the harmful-dependency failure mode: by repeatedly removing each sensor, none becomes indispensable.
             </p>
+
+            <h4 class="title is-5">Corruption types</h4>
+                  <div class="container is-max-desktop">
+                    <div id="dataset-carousel" class="carousel results-carousel">
+                      <a href="./static/gifs/blur_progression.gif" data-lightbox="image">
+                        <img src="./static/gifs/blur_progression.gif" alt="Blur">
+                      </a>
+
+                      <a href="./static/gifs/gaussian_progression.gif" data-lightbox="image">
+                        <img src="./static/gifs/gaussian_progression.gif" alt="Gaussian Noise">
+                      </a>
+
+                      <a href="./static/gifs/occlusion_progression.gif" data-lightbox="image">
+                        <img src="./static/gifs/occlusion_progression.gif" alt="Occlusion">
+                      </a>
+                    </div>
+                  </div>
             <p>
               Training proceeds in two stages: Stage 1 trains only the MLP connector with all pretrained modules frozen, aligning 4M-21 features with SmolLM2's token distribution; Stage 2 fine-tunes the connector and LoRA adapters under the full dropout curriculum. We validate incrementally to isolate failures: first an RGB-only run with no corruption, to verify the pipeline matches the vanilla SmolVLA baseline and the connector is not the bottleneck; then the dropout curriculum on RGB alone; and only once both pass do we add depth, segmentation, and thermal, evaluating under clean inputs, single-modality dropout, and the corruption protocol. This staged design lets us attribute any regression to a specific addition — a modality, the curriculum or the connector.
             </p>
