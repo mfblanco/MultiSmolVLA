@@ -378,7 +378,7 @@
 
             <h4 class="title is-5">Global Representation Misalignment</h4>
             <p>
-              We first investigated the global organization of the latent spaces using t-SNE visualization. The figure below shows the latent representations produced by SigLIP and by the projected 4M + MLP features before introducing any distillation objective.
+              We first investigated the global organization of the latent spaces using t-SNE visualization. The figure below shows the latent representations produced by SigLIP and by the projected 4M features before introducing any distillation objective.
             </p>
             <div class="columns is-centered">
               <div class="column is-three-quarters">
@@ -417,7 +417,7 @@
               </table>
             </div>
             <p>
-              These results confirmed that the projected 4M embeddings were both geometrically misaligned and strongly mismatched in magnitude compared to SigLIP representations. To address this issue, we introduced a global cosine alignment loss between the projected 4M + MLP embeddings and the original SigLIP features. The objective operated on mean-pooled visual embeddings, encouraging the global latent representations to become closer in direction.
+              These results confirmed that the projected 4M embeddings were both geometrically misaligned and strongly mismatched in magnitude compared to SigLIP representations. To address this issue, we introduced a global cosine alignment loss between the projected 4M embeddings and the original SigLIP features. The objective operated on mean-pooled visual embeddings, encouraging the global latent representations to become closer in direction.
             </p>
             <div class="columns is-centered">
               <div class="column is-three-quarters">
@@ -428,7 +428,7 @@
               </div>
             </div>
             <p>
-              After distillation, the projected 4M + MLP embeddings became significantly closer to the SigLIP manifold and the cosine similarity improved substantially.
+              After distillation, the projected 4M embeddings became significantly closer to the SigLIP manifold and the cosine similarity improved substantially.
             </p>
             <div class="table-container">
               <table class="table is-bordered is-striped is-narrow is-hoverable">
