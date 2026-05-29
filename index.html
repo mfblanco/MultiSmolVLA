@@ -232,7 +232,7 @@
               <li><strong>Sensor diversity.</strong> Integrating depth or semantic features risks a harmful dependency where sensor failure yields worse performance than an RGB-only baseline. This work strives to safely unlock multi-sensor capabilities.</li>
               <li><strong>Research gap.</strong> Current state-of-the-art robustness techniques, such as RobustVLA, focus on visual noise and RGB perturbations. No existing work studies what happens when a sensor is entirely absent at inference time across richer multimodal settings.</li>
             </ul>
-            <p><strong>Our approach.</strong> We test a sensor-robust multi-modal VLA that (i) leverages four complementary modalities (RGB, depth, segmentation, thermal) and (ii) is trained with corruption, using a frozen 4M-21 encoder and a modality-dropout curriculum.</p>
+            <p><strong>Our approach.</strong> We test a sensor-robust multi-modal VLA that (i) leverages four complementary modalities (RGB, depth, segmentation, thermal) and (ii) is trained with corruption, using a frozen 4M-21 encoder and a modality-dropout curriculum. (iii) We then propose changes and upgrades to the pipeline that could lead to better results and highlight the shortcomings of this approach.</p>
           </div>
         </div>
       </div>
