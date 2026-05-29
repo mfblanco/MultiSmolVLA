@@ -282,7 +282,7 @@
                   <h5 class="subtitle has-text-centered">
                     <font size="-0.7">
                       <span style="font-weight:normal">
-                        Our multimodal pipeline. Block 1 (perception): four modalities (RGB, depth, segmentation, thermal) pass through a modality-dropout layer; thermal is synthesized via ThermalGen and embedded by ImageBind into a 4M-21-compatible representation; the frozen 4M-21 encoder fuses the available modalities into a unified token sequence. Block 2 (action): tokens are projected into SmolLM2's space via an MLP connector (redpath), replacing the SigLIP route of vanilla SmolVLA, then drive the flow-matching action expert.
+                        Our multimodal pipeline. Block 1 (perception): four modalities (RGB, depth, segmentation, thermal) pass through a modality-dropout layer; the frozen 4M-21 encoder fuses the available modalities into a unified token sequence. Block 2 (action): tokens are projected into SmolLM2's space via an MLP connector (redpath), replacing the SigLIP route of vanilla SmolVLA, then drive the flow-matching action expert.
                       </span>
                     </font>
                   </h5>
