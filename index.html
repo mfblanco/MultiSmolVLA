@@ -70,29 +70,9 @@
 <!--TODO: THE LINKS RELATED TO THE PROJECT -->
           <div class="column has-text-centered">
             <div class="publication-links">
-              <!-- PDF Link. -->
-              <span class="link-block">
-                <a href="https://arxiv.org"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fas fa-file-pdf"></i>
-                  </span>
-                  <span>Document</span>
-                </a>
-              </span>
-              <!-- YouTube Link. -->
-              <span class="link-block">
-                <a href="https://www.youtube.com"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fab fa-youtube"></i>
-                  </span>
-                  <span>Video</span>
-                </a>
-              </span>
               <!-- GitHub Link. -->
               <span class="link-block">
-                <a href="https://github.com/tarhanefe/cs503-project-template"
+                <a href="https://github.com/TomasAnderegg/MultiSmolVLA"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="fab fa-github"></i>
@@ -102,17 +82,17 @@
               </span>
               <!-- Dataset Link. -->
                 <span class="link-block">
-                  <a href="https://drive.google.com/drive/folders/13W_453e-h2TWAfAnp6Ga00TYwEzTnMtg?usp=sharing"
+                  <a href="https://huggingface.co/datasets/TomasAnderegg/libero_10_thermal"
                     class="external-link button is-normal is-rounded is-dark">
                     <span class="icon">
                       <i class="fab fa-google-drive"></i>
                     </span>
-                    <span>Dataset/Drive</span>
+                    <span>Dataset</span>
                   </a>
                 </span>
               <!-- GitHub Website Link. -->
               <span class="link-block">
-                <a href="https://github.com/tarhanefe/cs503-project-template"
+                <a href="https://github.com/mfblanco/MultiSmolVLA/blob/main/index.html"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="fab fa-github"></i>
@@ -226,17 +206,7 @@
                 </p>
               </a>
             </div>
-<!--- TODO: Remove this part, this is here to show you possible visualizations used in the website ---------------->
-
-            <div class="tile is-parent">
-              <a href="#visual_items" class="tile is-child box">
-                <p class="subtitle">
-                  <font size="-1">Visual Items</font>
-                </p>
-              </a>
-            </div>
           </div>
-
         </div>
       </div>
 <!------------------------------------------------------------------------->
@@ -505,10 +475,10 @@
 <!-----------------------------TODO: DISCUSSION-------------------------------->
   <section class="section">
     <div class="container is-max-desktop">
-      <!-- Conclusion and Limitations. -->
+      <!-- Conclusion -->
       <div class="columns is-centered">
         <div class="column is-full-width">
-          <h2 class="title is-3" id="conclusion">V. Conclusion and Limitations</h2>
+          <h2 class="title is-3" id="conclusion">V. Conclusion</h2>
           <div class="content has-text-justified">
 
             <h3 class="title is-4">Conclusion</h3>
@@ -518,8 +488,22 @@
             <p>
               Diagnostic analysis indicated that the action expert experienced severe mode collapse. Rather than generating context-aware, dynamic movement trajectories, the network consistently converged on a static output corresponding to the statistical average of the training dataset. These results suggest that the flow-matching action module is highly sensitive to inconsistencies in the conditioning representations. Mapping a vision backbone to a language model using a standard MLP connector may be insufficient for this task. While the project successfully established the complex software infrastructure required to fuse these disparate architectural components, the failure to achieve functional robotic control underscores the significant difficulty of ensuring representation alignment in composite, multimodal systems.
             </p>
+          </div>
+        </div>
+      </div>
+      <!--/ Conclusion -->
+    </div>
+  </section>
+<!------------------------------------------------------------------------->
 
-            <h3 class="title is-4" id="limitations">Limitations and Future Work</h3>
+
+<!-----------------------------TODO: Limitations and Future work-------------------------------->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- Limitations -->
+      <div class="columns is-centered">
+        <div class="column is-full-width">
+            <h3 class="title is-3" id="limitations">VI. Limitations and Future Work</h3>
             <p>
               The defining limitation of our current implementation involves the highly unstable training dynamics and the resulting fragility of the learned representations. The collapse of the action head appears to be associated with instability in the representations produced by the vision encoder and connector. The simple MLP connector utilized to bridge the high-dimensional multimodal latent space and the language model's embedding space likely lacked the structural capacity to resolve such complex distributions. Because the action expert conditioned its outputs on these fluctuating representations, it is hypothesized that the flow-matching loss could not find a stable gradient, ultimately defaulting to a safe-mode average.
             </p>
@@ -538,7 +522,7 @@
           </div>
         </div>
       </div>
-      <!--/ Conclusion and Limitations. -->
+      <!--/ Limitations -->
     </div>
   </section>
 <!------------------------------------------------------------------------->
